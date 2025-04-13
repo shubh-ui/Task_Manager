@@ -16,17 +16,13 @@ const registerUser = async (req, res) => {
     try {
         const { name, email, password, profileImageUrl, adminInviteToken } = req.body;
 
-        console.log(req.body)
-
         const userExist = await User.findOne({ email });
-
         if (userExist) {
-            return res.status(403).json({ message: "User is already exist" })
+            return res.status(403).json({ message: "User is already exist" });
         }
-    console.log("Register method called")
 
         let role = "member";
-        if (adminInviteToken && adminInviteToken == process.env.ADMIN_INVITE_TOKEN) {
+        if (adminInviteToken && adminInviteToken == envConstants.ADMIN_INVITE_TOKEN) {
             role = "admin";
         }
 
@@ -64,6 +60,29 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     try {
+        const { email, password } = req.body;
+
+        console.log(req.body)
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        const isMatch = bcrypt.compare(password, user.password);
+        if(!isMatch) {
+            return res.status(401).json({message: "Invalid email or password"});
+        }
+
+        // return the user
+
+        res.status(200).json({
+            _id: user._id,
+            name:user.name,
+            email:user.email,
+            profileImageUrl:user.profileImageUrl,
+            role: user.role,
+            token: generateToken(user._id)
+        })
 
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error: error.json })
