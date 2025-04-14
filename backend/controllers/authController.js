@@ -96,7 +96,12 @@ const loginUser = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     try {
+        const user = await User.findById(req.user._id).select("-password");
+        if(!user) {
+            return res.status(404).json({message: "User not found"})
+        }
 
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error: error.json })
     }
@@ -108,9 +113,32 @@ const getUserProfile = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
     try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." })
+        }
+
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+
+        if (req.body.password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        const updatedUser = await user.save();
+
+        res.status(201).json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            token: generateToken(updatedUser._id)
+        })
 
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.json })
+        res.status(500).json({ message: "Internal server error", error: error.message })
     }
 }
 
