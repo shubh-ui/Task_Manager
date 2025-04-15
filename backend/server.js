@@ -3,7 +3,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
+const path = require("path");
+const fs = require("fs");
+
 const authRoutes = require("./routes/authRoutes")
+
+// Ensure uploads folder exists
+const uploadPath = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath);
+}
 
 const app = express();
 const PORT = 3000;
