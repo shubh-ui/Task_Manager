@@ -127,6 +127,10 @@ const updateUserProfile = async (req, res) => {
             user.password = await bcrypt.hash(password, salt);
         }
 
+        if(req.body.profileImageUrl) {
+            user.profileImageUrl = req.body.profileImageUrl || user.profileImageUrl;
+        }
+
         const updatedUser = await user.save();
 
         res.status(201).json({
@@ -134,6 +138,7 @@ const updateUserProfile = async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
+            profileImageUrl : updatedUser.profileImageUrl,
             token: generateToken(updatedUser._id)
         })
 
