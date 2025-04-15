@@ -6,7 +6,8 @@ const connectDB = require('./config/db');
 const path = require("path");
 const fs = require("fs");
 
-const authRoutes = require("./routes/authRoutes")
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // Ensure uploads folder exists
 const uploadPath = path.join(__dirname, "uploads");
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/auth", authRoutes)
+app.use("/api/users", userRoutes)
 
 // Start the server
 app.listen(PORT, () => {
