@@ -56,6 +56,25 @@ const getTasksById = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
+        const { title, description, priority, dueDate, assignedTo, attachments, todoChecklist } = req.body;
+
+        if(!Array.isArray(assignedTo)) {
+            return res.status(400).json({message: "assignedTo must be an array of usreId's"});
+        }
+
+        console.log(req.body)
+        const task = await Task.create({
+            title,
+            description,
+            priority,
+            dueDate,
+            assignedTo,
+            createdBy: req.user._id,
+            attachments,
+            todoChecklist
+        })
+
+        res.status(201).json({message: "Task created sucessfully", task});
 
     } catch (error) {
         res.status(500).json({ message: "Internal server error." });

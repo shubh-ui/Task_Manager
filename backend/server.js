@@ -8,6 +8,7 @@ const fs = require("fs");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 // Ensure uploads folder exists
 const uploadPath = path.join(__dirname, "uploads");
@@ -37,8 +38,9 @@ app.get('/', (req, res) => {
   res.send('Server is up and running 🚀');
 });
 
-app.use("/api/auth", authRoutes)
-app.use("/api/users", userRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // Start the server
 app.listen(PORT, () => {
