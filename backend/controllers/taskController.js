@@ -1,4 +1,5 @@
 const Task = require("../models/Task");
+const Project = require("../models/Project")
 
 // @desc    Get all dashboard data (admin only)
 // @route   GET /api/tasks/dashboardData
@@ -41,16 +42,38 @@ const getTasks = async (req, res) => {
 // @route  GET /api/tasks/:id
 // @access Private
 
-const getTasksById = async (req, res) => {
+const getTaskById = async (req, res) => {
     try {
-        const id = req.params.id;
-        const task = await Task.findById(id);
-        if(!task) return res.status(404).json({message: "task not found."});
+        const taskId = req.params.id;
+        const userId = req.user._id;
+
+        // Fetch task and populate projectId to access project data
+        const task = await Task.findById(taskId).populate('projectId');
+        if (!task) {
+            return res.status(404).json({ message: "Task not found." });
+        }
+
+        const project = task.projectId;
+        if (!project) {
+            return res.status(404).json({ message: "Project associated with this task not found." });
+        }
+
+        // Access control: Check if user is either the creator or a member
+        const isProjectCreator = project.createdBy.toString() === userId.toString();
+        const isProjectMember = project.members.some(
+            member => member.toString() === userId.toString()
+        );
+
+        if (!isProjectCreator && !isProjectMember) {
+            return res.status(403).json({ message: "Access denied to this task." });
+        }
+
         res.status(200).json(task);
     } catch (error) {
+        console.error("Get task by ID error:", error);
         res.status(500).json({ message: "Internal server error." });
     }
-}
+};
 
 
 // @desc    Create Task
@@ -59,13 +82,44 @@ const getTasksById = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { title, description, priority, dueDate, assignedTo, attachments, todoChecklist } = req.body;
+        const {
+            title,
+            description,
+            priority,
+            dueDate,
+            assignedTo,
+            attachments,
+            todoChecklist,
+            projectId
+        } = req.body;
 
-        if(!Array.isArray(assignedTo)) {
-            return res.status(400).json({message: "assignedTo must be an array of usreId's"});
+        if (!projectId) {
+            return res.status(400).json({ message: "Project ID is required" });
         }
 
-        console.log(req.body)
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        // Check if the user is the project creator (admin role enforcement)
+        if (project.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Only the project creator can create tasks" });
+        }
+
+        if (!Array.isArray(assignedTo)) {
+            return res.status(400).json({ message: "assignedTo must be an array of user IDs" });
+        }
+
+        // Optional: Validate assignees are project members
+        const invalidAssignees = assignedTo.filter(
+            userId => !project.members.map(m => m.toString()).includes(userId)
+        );
+
+        if (invalidAssignees.length > 0) {
+            return res.status(400).json({ message: "One or more assigned users are not members of the project" });
+        }
+
         const task = await Task.create({
             title,
             description,
@@ -74,15 +128,16 @@ const createTask = async (req, res) => {
             assignedTo,
             createdBy: req.user._id,
             attachments,
-            todoChecklist
-        })
+            todoChecklist,
+            projectId
+        });
 
-        res.status(201).json({message: "Task created sucessfully", task});
-
+        res.status(201).json({ message: "Task created successfully", task });
     } catch (error) {
+        console.error("Task creation error:", error);
         res.status(500).json({ message: "Internal server error." });
     }
-}
+};
 
 
 // @desc    Update Task
@@ -127,4 +182,4 @@ const deleteTask = async (req, res) => {
 }
 
 
-module.exports = { getDashboardData, getUserDashboardData, getTasks, getTasksById, createTask, updateTask, deleteTask }
+module.exports = { getDashboardData, getUserDashboardData, getTasks, getTaskById, createTask, updateTask, deleteTask }
