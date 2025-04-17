@@ -43,7 +43,10 @@ const getTasks = async (req, res) => {
 
 const getTasksById = async (req, res) => {
     try {
-
+        const id = req.params.id;
+        const task = await Task.findById(id);
+        if(!task) return res.status(404).json({message: "task not found."});
+        res.status(200).json(task);
     } catch (error) {
         res.status(500).json({ message: "Internal server error." });
     }
@@ -88,7 +91,23 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
     try {
+        const id = req.params.id;
+        const task = await Task.findById(id);
+        // console.log(req.body)
+        if(!task) return res.status(404).json({message: "Task not found."});
 
+        const { title, description, dueDate, priority, status, attachments } = req.body;
+        task.title = title || task.title;
+        task.description = description || task.description;
+        task.dueDate = dueDate || task.dueDate;
+        task.priority = priority || task.priority;
+        task.status = status || task.status;
+        task.attachments = attachments || task.attachments;
+
+
+        const updatedTask = await task.save();
+
+        res.status(200).json({message: "Task updated sucessfully", updatedTask});
     } catch (error) {
         res.status(500).json({ message: "Internal server error." })
     }
