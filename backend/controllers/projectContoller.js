@@ -54,6 +54,30 @@ const addMembersToProject = async (req, res) => {
     }
 }
 
+const getProjects = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        if(req.user.role == "admin") {
+            const projects = await Project.find({createdBy: userId});
+            if (projects.length === 0) {
+                return res.status(404).json({ message: "No projects found for this admin." });
+            }
+            return res.status(200).json(projects);
+        }
+
+        const projects = await Project.find({ members: userId });
+        if (projects.length === 0) {
+            return res.status(404).json({ message: "No projects found for this member." });
+        }
+
+        res.status(200).json({projects});
+
+    } catch (error) {
+        res.status(500).json({message: "Internal server error"});
+    }
+}
 
 
-module.exports = { createProject , addMembersToProject }
+
+module.exports = { createProject , addMembersToProject , getProjects }
