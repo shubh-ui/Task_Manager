@@ -9,13 +9,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formFieldType } from "@/constants/common";
 import { Link } from "react-router-dom";
+import ImagePreview from "@/components/ImagePreview";
 
 const Register = () => {
     const formSchema = z.object({
         name: z.string(),
         email: z.string().email("Invalid email address"), // Email validation
         password: z.string().min(6, "Password must be at least 6 characters"), // Password validation
-        adminInviteToken: z.string()
+        adminInviteToken: z.string(),
+        profileImageUrl: z.string()
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -24,7 +26,8 @@ const Register = () => {
             name: "",
             email: "",
             password: "",
-            adminInviteToken: ""
+            adminInviteToken: "",
+            profileImageUrl: ""
         },
     });
 
@@ -34,11 +37,11 @@ const Register = () => {
 
     }
     return (
-        <div className="bg-[#f0f2f3] mt-5 flex h-screen overflow-hidden">
+        <div className="bg-[#e4e7ea] mt-5 flex h-screen overflow-hidden">
 
             {/* Left Div (Form) */}
             <div className="w-1/2 flex items-center justify-center h-full px-4">
-                <div className="w-full max-w-[440px] bg-white p-[30px] px-[50px] rounded-[40px] flex flex-col gap-[28px] shadow-2xs">
+                <div className="w-full max-w-[440px] bg-white p-[30px] px-[50px] rounded-[34px] flex flex-col gap-[28px] shadow-2xs">
                     <h2 className="text-3xl font-medium">Create an account</h2>
                     <p className="font-medium text-[14px]">
                         Join us today, By entering the details below.
@@ -46,6 +49,7 @@ const Register = () => {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                             <div className="flex flex-col gap-3.5 items-start">
+                            <ImagePreview />   
                             <CustomFormField
                                     fieldType={formFieldType.INPUT}
                                     control={form.control}
@@ -76,6 +80,7 @@ const Register = () => {
                                     control={form.control}
                                     name="adminInviteToken"
                                     placeholder="Enter Token"
+                                    type="password"
                                     iconSrc={<ShieldCheck size={16} />}
                                     iconAlt="token"
                                 />

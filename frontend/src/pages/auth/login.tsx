@@ -26,11 +26,12 @@ const Login = () => {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values); // Do something with the form values.
+        // #f0f2f3
         // <img src="../../../public/TaskManager_baner.webp" alt="" />
 
     }
     return (
-        <div className="bg-[#f0f2f3] mt-5 flex h-screen overflow-hidden">
+        <div className="bg-[#e4e7ea] mt-5 flex h-screen overflow-hidden">
 
             {/* Left Div (Form) */}
             <div className="w-1/2 flex items-center justify-center h-full px-4">
