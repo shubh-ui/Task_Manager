@@ -3,7 +3,7 @@ import './App.css'
 
 import Register from "./pages/auth/register";
 import Login from "./pages/auth/login";
-import Header from "./components/ui/Header";
+import Header from "./components/Header";
 
 function App() {
 
