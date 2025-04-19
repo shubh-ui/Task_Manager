@@ -8,13 +8,17 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formFieldType } from "@/constants/common";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "@/utils/axiosInstance";
+import { API_PATH } from "@/utils/api-path";
 
 const Login = () => {
     const formSchema = z.object({
         email: z.string().email("Invalid email address"), // Email validation
         password: z.string().min(6, "Password must be at least 6 characters"), // Password validation
     });
+
+    const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -24,18 +28,43 @@ const Login = () => {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values); // Do something with the form values.
-        // #f0f2f3
-        // <img src="../../../public/TaskManager_baner.webp" alt="" />
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values);
+      
+        const { email, password } = values;
+      
+        try {
+          const response = await axiosInstance.post(API_PATH.AUTH.LOGIN, {
+            email,
+            password,
+          });
+      
+          console.log("Login successful", response.data);
 
-    }
+          const { token, role } = response.data;
+
+          if(token) {
+            localStorage.setItem('token', token);
+          }
+          if(role == "member") {
+            navigate("/user/dashboard");
+          }
+          else {
+            navigate("/admin/dashboard");
+          }
+      
+          // handle login success (e.g., save token, navigate, etc.)
+        } catch (error) {
+          console.error("Login failed", error);
+          // handle error (e.g., show message to user)
+        }
+      }
     return (
         <div className="bg-[#e4e7ea] mt-5 flex h-screen overflow-hidden">
 
             {/* Left Div (Form) */}
             <div className="w-1/2 flex items-center justify-center h-full px-4">
-                <div className="w-full max-w-[440px] bg-white p-[30px] px-[50px] rounded-[40px] flex flex-col gap-[28px] shadow-2xs">
+                <div className="w-full max-w-[440px] bg-white/85 p-[30px] px-[50px] rounded-[40px] flex flex-col gap-[28px] shadow-2xs">
                     <h2 className="text-3xl font-medium">Welcome Back</h2>
                     <p className="font-medium text-[14px]">
                         Hey, Enter your details to sign in to your account
