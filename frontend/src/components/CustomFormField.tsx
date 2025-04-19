@@ -1,4 +1,4 @@
-import React, { Children } from 'react'
+import React, { Children, useState } from 'react'
 import {
     FormControl,
     FormField,
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Control } from 'react-hook-form'
 import { Checkbox } from './ui/checkbox';
 import { Textarea } from './ui/textarea';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface CustomProps {
     control: Control<any>,
@@ -24,6 +25,7 @@ interface CustomProps {
     iconSrc?: any,
     iconAlt?: string,
     disabled?: boolean,
+    type?:string,
     dateFormat?: string,
     showTimeSelect?: boolean,
     children?: React.ReactNode,
@@ -31,7 +33,8 @@ interface CustomProps {
 }
 
 const RenderField = ({ field, props }: { field: any, props: CustomProps }) => {
-    const { fieldType, iconAlt, iconSrc, placeholder, dateFormat, showTimeSelect, renderSkeleton } = props;
+    const [ showPassword, setShowPassword ] = useState(false);
+    const { fieldType, iconAlt, iconSrc, placeholder, dateFormat, showTimeSelect, renderSkeleton , type } = props;
     // console.log("field", field)
     switch (fieldType) {
         case formFieldType.INPUT:
@@ -39,15 +42,23 @@ const RenderField = ({ field, props }: { field: any, props: CustomProps }) => {
                 <div className='flex rounded-md border border-dark-500 bg-dark-400 items-center w-full'>
                     {
                         iconSrc && (
-                           <span style={{height:'24px', width:'24px', marginLeft:'10px'}}>{iconSrc}</span> 
+                           <span style={{height:'16px', width:'16px', marginLeft:'10px'}}>{iconSrc}</span> 
                         )
                     }
                     <FormControl>
                         <Input
+                            type = { type == "password" ? (showPassword ? "text" : "password") : type}
                             placeholder={placeholder}
                             {...field}
                             className='shad-input border-0' />
                     </FormControl>
+                    {
+                        // iconSrc && (
+                        //    <span style={{height:'16px', width:'16px', marginLeft:'10px'}}>{iconSrc}</span> 
+                        // )
+                        <span className='opacity-40' style={{marginRight:'10px', cursor:'pointer'}}onClick={() => setShowPassword(!showPassword)} >{type == "password" ? (showPassword ? <Eye size={16} /> : <EyeOff size={16} /> ) : null}</span>
+                        
+                    }
                 </div>
             )
         case formFieldType.CHECKBOX:
