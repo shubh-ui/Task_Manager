@@ -1,9 +1,9 @@
-import { Button } from "./button"
+import { Button } from "./ui/button"
 
 const Header = () => {
     return (
         <div>
-            <div className="flex justify-between">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md h-16 flex justify-between items-center px-6">
                 <div>
                     <h3 className="text-3xl font-extrabold">TaskZen <span>.</span></h3>
                 </div>
