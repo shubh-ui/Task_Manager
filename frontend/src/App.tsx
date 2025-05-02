@@ -1,23 +1,49 @@
-import {BrowserRouter as Router, Routes ,Route} from "react-router-dom";
+import {BrowserRouter as Router, Routes ,Route, Outlet, Navigate} from "react-router-dom";
+import { UserContext, UserProvider } from "./context/userContext";
+
 import './App.css'
 
 import Register from "./pages/auth/register";
 import Login from "./pages/auth/login";
 import Header from "./components/Header";
+import { useContext } from "react";
 
 function App() {
 
+  const {user} = useContext(UserContext)
+
   return (
     <>
+    <UserProvider>
       <Router>
         <Header />
         <Routes>
            <Route path="/register" element={<Register />} />
            <Route path="/login" element={<Login />} />
+
+           {/* default route */}
+
+           <Route path="/" element={<Root />} />
         </Routes>
       </Router>
+
+    </UserProvider>
     </>
   )
+}
+
+const Root = () => {
+  const {user, loading} = useContext(UserContext);
+
+  if(loading) {
+    return <Outlet />
+  }
+
+  if(!user) {
+    return <Navigate to="/login" />
+  }
+
+  return user.role == "admin" ? <Navigate to="/admin/dashboard" /> : <Navigate to="/user/dashboard" />;
 }
 
 export default App
